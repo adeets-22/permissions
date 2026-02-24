@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAccount, useWallet, setIsOpen, useLogout } from "@getpara/react-sdk";
 import { useViemClient } from "@getpara/react-sdk/evm";
 import { http } from "viem";
-import { baseSepolia } from "viem/chains";
+import { sepolia, mainnet } from "viem/chains";
 import { Coins, ArrowLeft, Shield, Lock, CheckCircle2, AlertCircle, LogOut, Info, Wifi, WifiOff, Loader2, Send } from "lucide-react";
 import Link from "next/link";
 import { buildAllowancePolicy, type ParaPolicy } from "@/lib/permissions";
@@ -34,10 +34,12 @@ export default function ChildPage() {
   const { isConnected, isLoading, embedded } = useAccount();
   const { data: wallet } = useWallet();
   const { logout } = useLogout();
+  const [selectedChain, setSelectedChain] = useState(sepolia);
+  const rpcUrl = selectedChain.id === mainnet.id ? "https://eth.llamarpc.com" : "https://rpc.sepolia.org";
   const { viemClient, isLoading: signerLoading } = useViemClient({
     walletClientConfig: {
-      chain: baseSepolia,
-      transport: http("https://sepolia.base.org"),
+      chain: selectedChain,
+      transport: http(rpcUrl),
     },
   });
   const [showDetails, setShowDetails] = useState(false);
@@ -224,15 +226,15 @@ export default function ChildPage() {
               </div>
 
               <ul className="space-y-4">
-                {/* Network — always Base */}
+                {/* Network */}
                 <li className="flex items-start gap-3">
                   <div className="w-7 h-7 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
                     <div className="w-2 h-2 bg-blue-400 rounded-full" />
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium">Base Sepolia Testnet Only</p>
+                    <p className="text-white text-sm font-medium">Ethereum Sepolia Testnet</p>
                     <p className="text-white/40 text-xs">
-                      All transactions are restricted to Base Sepolia testnet (chainId: 84532)
+                      Policy enforced on Ethereum Sepolia testnet (chainId: 11155111)
                     </p>
                   </div>
                 </li>
@@ -312,6 +314,33 @@ export default function ChildPage() {
               </ul>
             </div>
 
+              {/* Network switcher */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-4">
+                <p className="text-white/40 text-xs font-medium uppercase tracking-wide mb-3">Network</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedChain(sepolia)}
+                    className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors border ${
+                      selectedChain.id === sepolia.id
+                        ? "bg-emerald-600 border-emerald-500 text-white"
+                        : "bg-white/5 border-white/10 text-white/50 hover:text-white/80"
+                    }`}
+                  >
+                    Sepolia (testnet)
+                  </button>
+                  <button
+                    onClick={() => setSelectedChain(mainnet)}
+                    className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors border ${
+                      selectedChain.id === mainnet.id
+                        ? "bg-emerald-600 border-emerald-500 text-white"
+                        : "bg-white/5 border-white/10 text-white/50 hover:text-white/80"
+                    }`}
+                  >
+                    Ethereum Mainnet
+                  </button>
+                </div>
+              </div>
+
               {/* Wallet accessibility status */}
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-4">
                 <p className="text-white/40 text-xs font-medium uppercase tracking-wide mb-3">Wallet Status</p>
@@ -356,7 +385,7 @@ export default function ChildPage() {
               {/* Send Transaction */}
               {wallet?.address && (
                 <div className="mb-4">
-                  <SendTransaction walletAddress={wallet.address} maxUSD={maxUSD} />
+                  <SendTransaction walletAddress={wallet.address} maxUSD={maxUSD} chain={selectedChain} />
                 </div>
               )}
 

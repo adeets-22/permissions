@@ -125,7 +125,7 @@ export default function Home() {
     "required": true,
     "permissions": [{
       "effect": "ALLOW",
-        "chainId": "84532",    // Base Sepolia testnet
+        "chainId": "11155111",  // Ethereum Sepolia testnet
       "type": "TRANSFER",
       "conditions": [
         { "resource": "VALUE",

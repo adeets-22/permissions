@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useViemClient } from "@getpara/react-sdk/evm";
 import { TransactionReviewDenied, TransactionReviewError, TransactionReviewTimeout } from "@getpara/core-sdk";
 import { http, isAddress, parseEther } from "viem";
-import { baseSepolia } from "viem/chains";
+import { mainnet, type Chain } from "viem/chains";
 import {
   Send,
   CheckCircle2,
@@ -22,7 +22,15 @@ type TxStatus =
   | { state: "blocked"; reason: string; reviewUrl?: string }
   | { state: "error"; reason: string };
 
-const BASE_SEPOLIA_CHAIN_ID = 84532;
+function getExplorerUrl(chain: Chain, hash: string) {
+  if (chain.id === mainnet.id) return `https://etherscan.io/tx/${hash}`;
+  return `https://sepolia.etherscan.io/tx/${hash}`;
+}
+
+function getRpcUrl(chain: Chain) {
+  if (chain.id === mainnet.id) return "https://eth.llamarpc.com";
+  return "https://rpc.sepolia.org";
+}
 
 /** Classify a Para error using SDK typed classes, then fall back to string matching */
 function classifyError(err: unknown): { blocked: boolean; reason: string; reviewUrl?: string } {
@@ -67,16 +75,16 @@ function classifyError(err: unknown): { blocked: boolean; reason: string; review
   return { blocked: isBlocked, reason };
 }
 
-export function SendTransaction({ walletAddress, maxUSD }: { walletAddress: string; maxUSD: number }) {
+export function SendTransaction({ walletAddress, maxUSD, chain }: { walletAddress: string; maxUSD: number; chain: Chain }) {
   const [to, setTo] = useState("");
   const [ethAmount, setEthAmount] = useState("");
   const [status, setStatus] = useState<TxStatus>({ state: "idle" });
 
-  // Para-backed viem WalletClient for Base Sepolia testnet
+  // Para-backed viem WalletClient — chain is passed in from parent
   const { viemClient, isLoading: clientLoading } = useViemClient({
     walletClientConfig: {
-      chain: baseSepolia,
-      transport: http("https://sepolia.base.org"),
+      chain,
+      transport: http(getRpcUrl(chain)),
     },
   });
 
@@ -111,11 +119,10 @@ export function SendTransaction({ walletAddress, maxUSD }: { walletAddress: stri
     try {
       // All signing goes through Para's MPC infrastructure.
       // Para's policy engine evaluates VALUE and chainId before signing.
-      // Chain: Base Sepolia (84532) — matches the policy chainId.
       const hash = await viemClient.sendTransaction({
         to: toAddr as `0x${string}`,
         value: valueBig,
-        chain: baseSepolia,
+        chain,
       });
 
       setStatus({ state: "success", hash });
@@ -146,7 +153,7 @@ export function SendTransaction({ walletAddress, maxUSD }: { walletAddress: stri
           <h2 className="text-white font-semibold">Send Transaction</h2>
           <p className="text-white/40 text-xs flex items-center gap-1">
             <Shield className="w-3 h-3" />
-            Enforced by Para · Base Sepolia testnet only
+            Enforced by Para · {chain.name}
           </p>
         </div>
       </div>
@@ -180,12 +187,12 @@ export function SendTransaction({ walletAddress, maxUSD }: { walletAddress: stri
                 Para signed and broadcast the transaction. It is within your allowed policy.
               </p>
               <a
-                href={`https://sepolia.basescan.org/tx/${status.hash}`}
+                href={getExplorerUrl(chain, status.hash)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-emerald-400 text-xs mt-2 hover:underline"
               >
-                View on Base Sepolia Basescan <ExternalLink className="w-3 h-3" />
+                View on Etherscan <ExternalLink className="w-3 h-3" />
               </a>
               <p className="text-white/30 text-xs font-mono mt-1 break-all">{status.hash}</p>
             </div>
@@ -296,7 +303,7 @@ export function SendTransaction({ walletAddress, maxUSD }: { walletAddress: stri
           {/* Chain indicator */}
           <div className="flex items-center gap-2 px-1">
             <div className="w-2 h-2 rounded-full bg-blue-400" />
-            <span className="text-white/30 text-xs">Base Sepolia testnet (chainId: {BASE_SEPOLIA_CHAIN_ID})</span>
+            <span className="text-white/30 text-xs">{chain.name} (chainId: {chain.id})</span>
           </div>
 
           {/* Send button */}

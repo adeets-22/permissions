@@ -44,16 +44,17 @@ export interface AllowanceConfig {
   childEmail: string;
 }
 
-// Base Sepolia testnet (chainId 84532) — enforced by Para policy
-const BASE_CHAIN_ID = "84532";
+// Ethereum Sepolia testnet (chainId 11155111) — enforced by Para policy
+const SEPOLIA_CHAIN_ID = "11155111";
+export const MAINNET_CHAIN_ID = "1";
 
 /**
  * Build a Para-compliant policy from allowance config.
  *
  * Rules encoded:
- *  - ALLOW TRANSFER on Base with VALUE <= maxTransactionValueUSD (EQUALS = max cap)
+ *  - ALLOW TRANSFER on Ethereum Sepolia with VALUE <= maxTransactionValueUSD (EQUALS = max cap)
  *  - Optional TO_ADDRESS INCLUDED_IN allowlist
- *  - DENY DEPLOY_CONTRACT on Base
+ *  - DENY DEPLOY_CONTRACT on Ethereum Sepolia
  */
 export function buildAllowancePolicy(config: AllowanceConfig, partnerId: string): ParaPolicy {
   // Conditions for the ALLOW TRANSFER permission
@@ -82,20 +83,20 @@ export function buildAllowancePolicy(config: AllowanceConfig, partnerId: string)
     scopes: [
       {
         name: "Allowance Transfer",
-        description: `Send up to $${config.maxTransactionValueUSD} USD per transaction on Base network`,
+        description: `Send up to $${config.maxTransactionValueUSD} USD per transaction on Ethereum network`,
         required: true,
         permissions: [
-          // Allow transfers on Base with value cap + optional address allowlist
+          // Allow transfers on Ethereum Sepolia with value cap + optional address allowlist
           {
             effect: "ALLOW",
-            chainId: BASE_CHAIN_ID,
+            chainId: SEPOLIA_CHAIN_ID,
             type: "TRANSFER",
             conditions: transferConditions,
           },
-          // Block contract deployments on Base
+          // Block contract deployments on Ethereum Sepolia
           {
             effect: "DENY",
-            chainId: BASE_CHAIN_ID,
+            chainId: SEPOLIA_CHAIN_ID,
             type: "DEPLOY_CONTRACT",
             conditions: [],
           },
@@ -111,7 +112,12 @@ export function policyToReadableRules(policy: ParaPolicy): string[] {
 
   for (const scope of policy.scopes) {
     for (const perm of scope.permissions) {
-      const chainLabel = perm.chainId === BASE_CHAIN_ID ? "Base Sepolia (testnet)" : `Chain ${perm.chainId}`;
+      const chainLabel =
+        perm.chainId === SEPOLIA_CHAIN_ID
+          ? "Ethereum Sepolia (testnet)"
+          : perm.chainId === MAINNET_CHAIN_ID
+          ? "Ethereum Mainnet"
+          : `Chain ${perm.chainId}`;
 
       if (perm.effect === "DENY" && perm.type === "DEPLOY_CONTRACT") {
         rules.push("Contract deployments are blocked");

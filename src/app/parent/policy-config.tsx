@@ -99,11 +99,11 @@ export function PolicyConfig({ onSubmit, onBack }: PolicyConfigProps) {
             </div>
             <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg px-3 py-1.5 flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-400" />
-              <span className="text-blue-300 text-sm font-medium">Base Sepolia testnet (chainId: 84532)</span>
+              <span className="text-blue-300 text-sm font-medium">Ethereum Sepolia testnet (chainId: 11155111)</span>
             </div>
           </div>
           <div className="mt-3 pt-3 border-t border-white/5 text-xs text-white/30 font-mono">
-            permission.chainId = &quot;84532&quot;
+            permission.chainId = &quot;11155111&quot;
           </div>
         </div>
 
