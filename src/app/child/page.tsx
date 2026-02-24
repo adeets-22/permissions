@@ -35,7 +35,7 @@ export default function ChildPage() {
   const { data: wallet } = useWallet();
   const { logout } = useLogout();
   const [selectedChain, setSelectedChain] = useState(sepolia);
-  const rpcUrl = selectedChain.id === mainnet.id ? "https://eth.llamarpc.com" : "https://rpc.sepolia.org";
+  const rpcUrl = selectedChain.id === mainnet.id ? "https://ethereum-rpc.publicnode.com" : "https://ethereum-sepolia-rpc.publicnode.com";
   const { viemClient, isLoading: signerLoading } = useViemClient({
     walletClientConfig: {
       chain: selectedChain,

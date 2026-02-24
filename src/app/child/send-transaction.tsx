@@ -28,8 +28,8 @@ function getExplorerUrl(chain: Chain, hash: string) {
 }
 
 function getRpcUrl(chain: Chain) {
-  if (chain.id === mainnet.id) return "https://eth.llamarpc.com";
-  return "https://rpc.sepolia.org";
+  if (chain.id === mainnet.id) return "https://ethereum-rpc.publicnode.com";
+  return "https://ethereum-sepolia-rpc.publicnode.com";
 }
 
 /** Classify a Para error using SDK typed classes, then fall back to string matching */
