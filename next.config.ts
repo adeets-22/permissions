@@ -42,6 +42,7 @@ const nextConfig: NextConfig = {
         "@farcaster/miniapp-sdk": false,
         "@farcaster/miniapp-wagmi-connector": false,
         "@farcaster/mini-app-solana": false,
+        "react-native-async-storage/async-storage": false,
       };
 
       return config;

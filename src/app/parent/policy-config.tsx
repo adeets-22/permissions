@@ -47,7 +47,7 @@ export function PolicyConfig({ onSubmit, onBack }: PolicyConfigProps) {
     if (!childEmail) newErrors.childEmail = "Required";
     else if (!childEmail.includes("@")) newErrors.childEmail = "Invalid email";
     if (maxValueUSD < 1) newErrors.maxValue = "Minimum $1";
-    if (maxValueUSD > 1000) newErrors.maxValue = "Maximum $1000";
+    if (maxValueUSD > 15) newErrors.maxValue = "Maximum $15";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -118,7 +118,7 @@ export function PolicyConfig({ onSubmit, onBack }: PolicyConfigProps) {
               <input
                 type="number"
                 min={1}
-                max={1000}
+                max={15}
                 value={maxValueUSD}
                 onChange={(e) => {
                   setMaxValueUSD(Number(e.target.value));
@@ -134,15 +134,15 @@ export function PolicyConfig({ onSubmit, onBack }: PolicyConfigProps) {
           <input
             type="range"
             min={1}
-            max={100}
+            max={15}
             value={maxValueUSD}
             onChange={(e) => setMaxValueUSD(Number(e.target.value))}
-            className="w-full mt-3 accent-indigo-500"
+            className="w-1/2 mt-3 accent-indigo-500"
           />
-          <div className="flex justify-between text-white/30 text-xs mt-1">
+          <div className="flex justify-between text-white/30 text-xs mt-1 w-1/2">
             <span>$1</span>
-            <span>$50</span>
-            <span>$100</span>
+            <span>$8</span>
+            <span>$15</span>
           </div>
 
           {errors.maxValue && (
